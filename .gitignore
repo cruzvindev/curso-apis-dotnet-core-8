@@ -1,0 +1,80 @@
+﻿# Build Folders (can be generated from solution file)
+[Bb]in/
+[Oo]bj/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+.vscode/
+.vs/
+_ReSharper*
+*_ReSharper.Caches
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.swp
+*.sln.ide
+*.sln.aggregate
+
+# ASP.NET
+wwwroot/
+bundleconfig.json
+node_modules/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Mono Auto Generated Files
+mono_crash.*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Temporary files
+*.temp
+*.TMP
+*.tmp
+
+# All Logfiles
+*.log
+
+# Visual Studio Code
+.vscode/*
+
+# Rider
+.idea/
+.idea/*
+
+# Local history for Visual Studio and Rider
+.localhistory
+
+# DotNet and Nuget
+.DS_Store
+*.nupkg
+*.snupkg
+.nuget/
+
+# Uncomment if using JetBrains Rider
+# See https://rider-support.jetbrains.com/hc/en-us/articles/207097529
+.idea/
