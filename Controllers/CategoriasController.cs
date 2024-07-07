@@ -1,52 +1,51 @@
 ﻿using APICatalogo.Context;
+using APICatalogo.Filters;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class CategoriasController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(AppDbContext context)
+    public CategoriasController(AppDbContext context, ILogger<CategoriasController> logger)
     {
         _context = context;
-    }
-
-    [HttpGet("produtos")]
-    public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
-    {
-        return _context.Categorias.Include(p => p.Produtos).ToList();
+        _logger = logger;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Categoria>> Get()
+    public async Task<ActionResult<IEnumerable<Categoria>>> Get()
     {
-        //As entidades são lidas diretamente da fonte e não da memória do EF 
-        return _context.Categorias.AsNoTracking().ToList();
+        return await _context.Categorias.AsNoTracking().ToListAsync();
     }
 
-    [HttpGet("{id:int}", Name = "ObterCategoria")]  // Aqui está corrigido
+    [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> Get(int id)
     {
         var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
         if (categoria == null)
         {
-            return NotFound("Categoria não encontrada...");
+            _logger.LogWarning($"Categoria com id= {id} não encontrada...");
+            return NotFound($"Categoria com id= {id} não encontrada...");
         }
-
         return Ok(categoria);
     }
 
     [HttpPost]
     public ActionResult Post(Categoria categoria)
     {
-        if (categoria == null)
-            return BadRequest();
+        if (categoria is null)
+        {
+            _logger.LogWarning($"Dados inválidos...");
+            return BadRequest("Dados inválidos");
+        }
 
         _context.Categorias.Add(categoria);
         _context.SaveChanges();
@@ -59,28 +58,28 @@ public class CategoriasController : ControllerBase
     {
         if (id != categoria.CategoriaId)
         {
-            return BadRequest();
+            _logger.LogWarning($"Dados inválidos...");
+            return BadRequest("Dados inválidos");
         }
 
         _context.Entry(categoria).State = EntityState.Modified;
         _context.SaveChanges();
-
         return Ok(categoria);
     }
 
     [HttpDelete("{id:int}")]
-    public ActionResult<Categoria> Delete(int id)
+    public ActionResult Delete(int id)
     {
-        var categoria = _context.Categorias.FirstOrDefault(c => c.CategoriaId == id);
+        var categoria = _context.Categorias.FirstOrDefault(p => p.CategoriaId == id);
 
         if (categoria == null)
         {
-            return NotFound("Categoria não localizada...");
+            _logger.LogWarning($"Categoria com id={id} não encontrada...");
+            return NotFound($"Categoria com id={id} não encontrada...");
         }
 
         _context.Categorias.Remove(categoria);
         _context.SaveChanges();
-
         return Ok(categoria);
     }
 }

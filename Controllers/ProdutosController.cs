@@ -6,33 +6,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers;
 
-[Route("[controller]")] //Referencia o nome da classe como rota
+[Route("[controller]")]
 [ApiController]
 public class ProdutosController : ControllerBase
 {
     private readonly AppDbContext _context;
-
     public ProdutosController(AppDbContext context)
     {
         _context = context;
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Produto>> Get()
+    public async Task<ActionResult<IEnumerable<Produto>>> Get()
     {
-        var produtos = _context.Produtos.ToList();
-        if(produtos is null)
+        var produtos = await _context.Produtos.ToListAsync();
+        if (produtos is null)
         {
-            return NotFound("Produtos não encontrado");
+            return NotFound();
         }
         return produtos;
     }
 
-    [HttpGet("{id:int}", Name = "ObterProduto")]
-    public ActionResult<Produto> GetProduto(int id)
+    [HttpGet("{id}", Name = "ObterProduto")]
+    public async Task<ActionResult<Produto>> Get(int id)
     {
-        var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
-        if(produto is null)
+        var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.ProdutoId == id);
+        if (produto is null)
         {
             return NotFound("Produto não encontrado...");
         }
@@ -42,22 +41,20 @@ public class ProdutosController : ControllerBase
     [HttpPost]
     public ActionResult Post(Produto produto)
     {
-        if(produto is null)
-        {
+        if (produto is null)
             return BadRequest();
-        }
 
         _context.Produtos.Add(produto);
         _context.SaveChanges();
 
-        //Retorna 201 e chama a URL especificada
-        return new CreatedAtRouteResult("ObterProduto", new {id = produto.ProdutoId}, produto);
+        return new CreatedAtRouteResult("ObterProduto",
+            new { id = produto.ProdutoId }, produto);
     }
 
     [HttpPut("{id:int}")]
     public ActionResult Put(int id, Produto produto)
     {
-        if(id != produto.ProdutoId)
+        if (id != produto.ProdutoId)
         {
             return BadRequest();
         }
@@ -71,17 +68,16 @@ public class ProdutosController : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId==id);
+        var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+        //var produto = _context.Produtos.Find(id);
 
-        if(produto is null)
+        if (produto is null)
         {
             return NotFound("Produto não localizado...");
         }
-
         _context.Produtos.Remove(produto);
         _context.SaveChanges();
 
         return Ok(produto);
     }
-
 }
