@@ -15,7 +15,7 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
 
     public IEnumerable<T> GetAll()
     {
-        return _context.Set<T>().ToList(); //Set retorna um conjunto do tipo especificado direto do banco que eu posso manipular
+        return _context.Set<T>().AsNoTracking().ToList(); //Set retorna um conjunto do tipo especificado direto do banco que eu posso manipular
     }
 
     public T? Get(Expression<Func<T, bool>> predicate)
@@ -26,7 +26,7 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
     public T Create(T entity)
     {
         _context.Set<T>().Add(entity);
-        _context.SaveChanges();
+       // _context.SaveChanges();
 
         return entity;
     }
@@ -35,7 +35,7 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
     {
        _context.Set<T>().Update(entity);
         // _context.Entry(entity).State = EntityState.Modified;
-        _context.SaveChanges();
+        //_context.SaveChanges();
 
         return entity;
     }
@@ -43,7 +43,7 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
     public T Delete(T entity)
     {
        _context.Set<T>().Remove(entity);
-        _context.SaveChanges();
+       // _context.SaveChanges();
 
         return entity;
     }
