@@ -1,5 +1,8 @@
-﻿using APICatalogo.Models;
+﻿using APICatalogo.DTOs;
+using APICatalogo.Models;
 using APICatalogo.Repositories;
+using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Controllers;
@@ -9,73 +12,123 @@ namespace APICatalogo.Controllers;
 public class ProdutosController : ControllerBase
 {
     private readonly IUnityOfWork _uof;
-    public ProdutosController(IUnityOfWork uof)
+    private readonly IMapper _mapper;
+    public ProdutosController(IUnityOfWork uof, IMapper mapper)
     {
         _uof = uof;
+        _mapper = mapper;
     }
 
     [HttpGet("produtos/{id}")]
-    public ActionResult<IEnumerable<Produto>> GetProdutosCategoria(int id)
+    public ActionResult<IEnumerable<ProdutoDTO>> GetProdutosCategoria(int id)
     {
        var produtos =  _uof.ProdutoRepository.GetProdutosPorCategoria(id);
 
         if(produtos is null)
             return NotFound();
 
-        return Ok(produtos);
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);  //Quero retornar um ProdutoDTO a partir de produtos
+        return Ok(produtosDto);
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Produto>> Get()
+    public ActionResult<IEnumerable<ProdutoDTO>> Get()
     {
         var produtos = _uof.ProdutoRepository.GetAll();
         if (produtos is null)
         {
             return NotFound();
         }
-        return Ok(produtos);
+
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+        return Ok(produtosDto);
     }
 
     [HttpGet("{id}", Name = "ObterProduto")]
-    public ActionResult<Produto> Get(int id)
+    public ActionResult<ProdutoDTO> Get(int id)
     {
         var produto = _uof.ProdutoRepository.Get(c => c.ProdutoId == id);
         if (produto is null)
         {
             return NotFound("Produto não encontrado...");
         }
-        return Ok(produto);
+
+        var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+        return Ok(produtoDto);
     }
 
     [HttpPost]
-    public ActionResult Post(Produto produto)
+    public ActionResult<ProdutoDTO> Post(ProdutoDTO produtoDto)
     {
-        if (produto is null)
+        if (produtoDto is null)
             return BadRequest();
 
-       var novoProduto = _uof.ProdutoRepository.Create(produto);
+        var produto = _mapper.Map<Produto>(produtoDto);
+
+        var novoProduto = _uof.ProdutoRepository.Create(produto);
         _uof.Commit();
 
+        var novoProdutoDto = _mapper.Map<ProdutoDTO>(novoProduto);
+
         return new CreatedAtRouteResult("ObterProduto",
-            new { id = produto.ProdutoId }, produto);
+            new { id =  novoProdutoDto.ProdutoId }, novoProdutoDto);
+    }
+
+    /*
+     O JSON Patch é um formato para especificar atualizações parciais em um documento JSON. Ele permite que você envie apenas as partes do documento
+    que precisam ser alteradas, em vez de enviar o documento inteiro. No ASP.NET Core, a implementação do JSON Patch segue a especificação RFC 6902 e é
+    particularmente útil para operações de atualização parcial em APIs REST.
+    */
+
+    [HttpPatch("{id}/UpdatePartial")]
+    public ActionResult<ProdutoDTOUpdateResponse> Patch(int id, JsonPatchDocument<ProdutoDTOUpdateRequest> patchProdutoDTO)
+    {
+        if(patchProdutoDTO is null || id <= 0) 
+            return BadRequest();
+
+        var produto = _uof.ProdutoRepository.Get(c => c.ProdutoId == id);
+
+        if(produto is null)
+            return NotFound();
+
+        //Usa o AutoMapper para mapear o produto para um objeto ProdutoDTOUpdateRequest
+        var produtoUpdateRequest = _mapper.Map<ProdutoDTOUpdateRequest>(produto);
+
+        //Aplica as alterações do patchProdutoDTO ao produtoUpdateRequest, atualizando o objeto com as novas propriedades.
+        patchProdutoDTO.ApplyTo(produtoUpdateRequest, ModelState);
+
+        if(!ModelState.IsValid || TryValidateModel(produtoUpdateRequest))
+            return BadRequest(ModelState);
+
+        //Usa o AutoMapper para mapear as alterações do produtoUpdateRequest de volta para o objeto produto
+        _mapper.Map(produtoUpdateRequest, produto);
+
+        _uof.ProdutoRepository.Update(produto);
+        _uof.Commit();
+
+        return Ok(_mapper.Map<ProdutoDTOUpdateResponse>(produto));
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult Put(int id, Produto produto)
+    public ActionResult<ProdutoDTO> Put(int id, ProdutoDTO produtoDto)
     {
-        if (id != produto.ProdutoId)
+
+        if (id != produtoDto.ProdutoId)
         {
             return BadRequest();
         }
 
-       var produtoAtualizado = _uof.ProdutoRepository.Update(produto);
+        var produto = _mapper.Map<Produto>(produtoDto);
+        var produtoAtualizado = _uof.ProdutoRepository.Update(produto);
         _uof.Commit();
 
-       return Ok(produtoAtualizado);
+        var produtoAtualizadoDto = _mapper.Map<ProdutoDTO>(produtoAtualizado);
+
+       return Ok(produtoAtualizadoDto);
     }
 
     [HttpDelete("{id:int}")]
-    public ActionResult Delete(int id)
+    public ActionResult<ProdutoDTO> Delete(int id)
     {
        var produto = _uof.ProdutoRepository.Get(p => p.ProdutoId == id);
 
@@ -87,6 +140,8 @@ public class ProdutosController : ControllerBase
        var produtoDeletado =  _uof.ProdutoRepository.Delete(produto);
         _uof.Commit();
 
-       return Ok(produtoDeletado);
+        var produtoDeletadoDto = _mapper.Map<ProdutoDTO>(produtoDeletado);
+
+       return Ok(produtoDeletadoDto);
     }
 }
