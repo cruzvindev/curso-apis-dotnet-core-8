@@ -1,6 +1,6 @@
 ﻿using APICatalogo.Context;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace APICatalogo.Repositories;
 
@@ -20,20 +20,20 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
 
     public T? Get(Expression<Func<T, bool>> predicate)
     {
-       return _context.Set<T>().FirstOrDefault(predicate);
+        return _context.Set<T>().FirstOrDefault(predicate);
     }
 
     public T Create(T entity)
     {
         _context.Set<T>().Add(entity);
-       // _context.SaveChanges();
+        // _context.SaveChanges();
 
         return entity;
     }
 
     public T Update(T entity)
     {
-       _context.Set<T>().Update(entity);
+        _context.Set<T>().Update(entity);
         // _context.Entry(entity).State = EntityState.Modified;
         //_context.SaveChanges();
 
@@ -42,8 +42,8 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
 
     public T Delete(T entity)
     {
-       _context.Set<T>().Remove(entity);
-       // _context.SaveChanges();
+        _context.Set<T>().Remove(entity);
+        // _context.SaveChanges();
 
         return entity;
     }

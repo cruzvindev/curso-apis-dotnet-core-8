@@ -43,5 +43,4 @@ public static class CategoriaDTOMappingExtensions
             ImagemUrl = categoria.ImagemUrl
         }).ToList();
     }
-
 }

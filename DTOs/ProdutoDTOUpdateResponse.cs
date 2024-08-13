@@ -1,6 +1,4 @@
-﻿using APICatalogo.Models;
-
-namespace APICatalogo.DTOs;
+﻿namespace APICatalogo.DTOs;
 
 public class ProdutoDTOUpdateResponse
 {

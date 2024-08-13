@@ -1,10 +1,9 @@
-﻿
-namespace APICatalogo.Logging;
+﻿namespace APICatalogo.Logging;
 
 public class CustomLogger : ILogger
 {
-    readonly string loggerName;
-    readonly CustomLoggerProviderConfiguration loggerConfig;
+    private readonly string loggerName;
+    private readonly CustomLoggerProviderConfiguration loggerConfig;
 
     public CustomLogger(string name, CustomLoggerProviderConfiguration config)
     {

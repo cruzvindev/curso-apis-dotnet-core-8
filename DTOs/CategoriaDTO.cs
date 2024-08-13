@@ -11,6 +11,6 @@ public class CategoriaDTO
     public string? Nome { get; set; }
 
     [Required]
-    [StringLength (300)]
+    [StringLength(300)]
     public string? ImagemUrl { get; set; }
 }

@@ -20,7 +20,6 @@ namespace APICatalogo.Migrations
             migrationBuilder.Sql("Insert into Produtos(Nome, Descricao, Preco, ImagemUrl, Estoque, DataCadastro, CategoriaId) Values ('Sopa de Legumes', 'Sopa quente de legumes variados', 10.00, 'sopa_legumes.jpg', 25, now(), 8)");
             migrationBuilder.Sql("Insert into Produtos(Nome, Descricao, Preco, ImagemUrl, Estoque, DataCadastro, CategoriaId) Values ('Batata Frita', 'Porção de batata frita crocante', 8.00, 'batata_frita.jpg', 40, now(), 9)");
             migrationBuilder.Sql("Insert into Produtos(Nome, Descricao, Preco, ImagemUrl, Estoque, DataCadastro, CategoriaId) Values ('Hambúrguer Vegetariano', 'Hambúrguer feito com grão-de-bico e vegetais', 15.00, 'hamburguer_vegetariano.jpg', 22, now(), 10)");
-
         }
 
         /// <inheritdoc />

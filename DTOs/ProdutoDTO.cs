@@ -19,6 +19,5 @@ public class ProdutoDTO
 
     [Required]
     [StringLength(300)]
-   
     public int CategoriaId { get; set; }
 }

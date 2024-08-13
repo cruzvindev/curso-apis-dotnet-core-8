@@ -20,7 +20,6 @@ namespace APICatalogo.Migrations
             migrationBuilder.Sql("Insert into Categorias(Nome, ImagemUrl) Values ('Sopas', 'sopas.jpg')");
             migrationBuilder.Sql("Insert into Categorias(Nome, ImagemUrl) Values ('Aperitivos', 'aperitivos.jpg')");
             migrationBuilder.Sql("Insert into Categorias(Nome, ImagemUrl) Values ('Vegetarianos', 'vegetarianos.jpg')");
-
         }
 
         /// <inheritdoc />

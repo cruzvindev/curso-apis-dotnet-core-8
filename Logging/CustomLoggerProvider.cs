@@ -4,8 +4,8 @@ namespace APICatalogo.Logging;
 
 public class CustomLoggerProvider : ILoggerProvider
 {
-    readonly CustomLoggerProviderConfiguration loggerConfig;
-    readonly ConcurrentDictionary<string, CustomLogger> loggers = new ConcurrentDictionary<string, CustomLogger>();
+    private readonly CustomLoggerProviderConfiguration loggerConfig;
+    private readonly ConcurrentDictionary<string, CustomLogger> loggers = new ConcurrentDictionary<string, CustomLogger>();
 
     public CustomLoggerProvider(CustomLoggerProviderConfiguration config)
     {
@@ -14,7 +14,7 @@ public class CustomLoggerProvider : ILoggerProvider
 
     public ILogger CreateLogger(string categoryName)
     {
-       return loggers.GetOrAdd(categoryName, name => new CustomLogger(name, loggerConfig));
+        return loggers.GetOrAdd(categoryName, name => new CustomLogger(name, loggerConfig));
     }
 
     public void Dispose()

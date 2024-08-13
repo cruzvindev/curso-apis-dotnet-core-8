@@ -7,10 +7,9 @@ namespace APICatalogo.Models;
 [Table("Categorias")]
 public class Categoria
 {
-
     public Categoria()
     {
-        Produtos = new Collection<Produto>();   
+        Produtos = new Collection<Produto>();
     }
 
     [Key]
@@ -21,7 +20,8 @@ public class Categoria
     public string? Nome { get; set; }
 
     [Required]
-    [StringLength (300)]
+    [StringLength(300)]
     public string? ImagemUrl { get; set; }
-    public ICollection<Produto>? Produtos { get; set; } 
+
+    public ICollection<Produto>? Produtos { get; set; }
 }
