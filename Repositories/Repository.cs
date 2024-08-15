@@ -13,21 +13,20 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
         _context = context;
     }
 
-    public IEnumerable<T> GetAll()
+    public async Task<IEnumerable<T>> GetAllAsync() 
     {
-        return _context.Set<T>().AsNoTracking().ToList(); //Set retorna um conjunto do tipo especificado direto do banco que eu posso manipular
+        return await _context.Set<T>().AsNoTracking().ToListAsync(); //Set retorna um conjunto do tipo especificado direto do banco que eu posso manipular
     }
 
-    public T? Get(Expression<Func<T, bool>> predicate)
+    public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate)
     {
-        return _context.Set<T>().FirstOrDefault(predicate);
+        return await _context.Set<T>().FirstOrDefaultAsync(predicate);
     }
 
     public T Create(T entity)
     {
         _context.Set<T>().Add(entity);
         // _context.SaveChanges();
-
         return entity;
     }
 
@@ -36,7 +35,6 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
         _context.Set<T>().Update(entity);
         // _context.Entry(entity).State = EntityState.Modified;
         //_context.SaveChanges();
-
         return entity;
     }
 
@@ -44,7 +42,6 @@ public class Repository<T> : IRepository<T> where T : class //Indica que T deve 
     {
         _context.Set<T>().Remove(entity);
         // _context.SaveChanges();
-
         return entity;
     }
 }
