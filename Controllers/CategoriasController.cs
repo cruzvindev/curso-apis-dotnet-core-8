@@ -11,7 +11,7 @@ using X.PagedList;
 
 namespace APICatalogo.Controllers;
 
-[Route("[controller]")]
+[Route("[controller]/v{version:apiVersion}")]
 [ApiController]
 [EnableRateLimiting("fixedwindow")]
 public class CategoriasController : ControllerBase
