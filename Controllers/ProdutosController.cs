@@ -32,19 +32,52 @@ public class ProdutosController : ControllerBase
         if (produtos is null)
             return NotFound();
 
-        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);  //Quero retornar um ProdutoDTO a partir de produtos
+        //var destino = _mapper.Map<Destino>(origem);
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+
         return Ok(produtosDto);
     }
-    
+
+    [HttpGet("pagination")]
+    public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery]
+                                   ProdutosParameters produtosParameters)
+    {
+        var produtos = await _uof.ProdutoRepository.GetProdutosAsync(produtosParameters);
+
+        return ObterProdutos(produtos);
+    }
+
+    [HttpGet("filter/preco/pagination")]
+    public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosFilterPreco([FromQuery] ProdutosFiltroPreco
+                                                                                    produtosFilterParameters)
+    {
+        var produtos = await _uof.ProdutoRepository.GetProdutosFiltroPrecoAsync(produtosFilterParameters);
+        return ObterProdutos(produtos);
+    }
+    private ActionResult<IEnumerable<ProdutoDTO>> ObterProdutos(X.PagedList.IPagedList<Produto> produtos)
+    {
+        var metadata = new
+        {
+            produtos.Count,
+            produtos.PageSize,
+            produtos.PageCount,
+            produtos.TotalItemCount,
+            produtos.HasNextPage,
+            produtos.HasPreviousPage
+        };
+
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+        return Ok(produtosDto);
+    }
+
+    [Authorize(Policy ="UserOnly")]
     [HttpGet]
-    [Authorize(Policy = "UserOnly")]
     public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get()
     {
         var produtos = await _uof.ProdutoRepository.GetAllAsync();
         if (produtos is null)
-        {
             return NotFound();
-        }
 
         var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
         return Ok(produtosDto);
@@ -58,23 +91,8 @@ public class ProdutosController : ControllerBase
         {
             return NotFound("Produto não encontrado...");
         }
-
         var produtoDto = _mapper.Map<ProdutoDTO>(produto);
         return Ok(produtoDto);
-    }
-
-    [HttpGet("pagination")]
-    public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Get([FromQuery] ProdutosParameters produtosParameters)
-    {
-        var produtos = await _uof.ProdutoRepository.GetProdutosAsync(produtosParameters);
-        return ObterProdutos(produtos);
-    }
-
-    [HttpGet("filter/preco/pagination")]
-    public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutosFilterPreco([FromQuery] ProdutosFiltroPreco produtosFiltroPreco)
-    {
-        var produtos = await _uof.ProdutoRepository.GetProdutosFiltroPrecoAsync(produtosFiltroPreco);
-        return ObterProdutos(produtos);
     }
 
     [HttpPost]
@@ -86,7 +104,7 @@ public class ProdutosController : ControllerBase
         var produto = _mapper.Map<Produto>(produtoDto);
 
         var novoProduto = _uof.ProdutoRepository.Create(produto);
-       await  _uof.CommitAsync();
+        await _uof.CommitAsync();
 
         var novoProdutoDto = _mapper.Map<ProdutoDTO>(novoProduto);
 
@@ -94,7 +112,7 @@ public class ProdutosController : ControllerBase
             new { id = novoProdutoDto.ProdutoId }, novoProdutoDto);
     }
 
-    /*
+/*
      O JSON Patch é um formato para especificar atualizações parciais em um documento JSON. Ele permite que você envie apenas as partes do documento
     que precisam ser alteradas, em vez de enviar o documento inteiro. No ASP.NET Core, a implementação do JSON Patch segue a especificação RFC 6902 e é
     particularmente útil para operações de atualização parcial em APIs REST.
@@ -133,11 +151,10 @@ public class ProdutosController : ControllerBase
     public async Task<ActionResult<ProdutoDTO>> Put(int id, ProdutoDTO produtoDto)
     {
         if (id != produtoDto.ProdutoId)
-        {
-            return BadRequest();
-        }
+            return BadRequest();//400
 
         var produto = _mapper.Map<Produto>(produtoDto);
+
         var produtoAtualizado = _uof.ProdutoRepository.Update(produto);
         await _uof.CommitAsync();
 
@@ -150,7 +167,6 @@ public class ProdutosController : ControllerBase
     public async Task<ActionResult<ProdutoDTO>> Delete(int id)
     {
         var produto = await _uof.ProdutoRepository.GetAsync(p => p.ProdutoId == id);
-
         if (produto is null)
         {
             return NotFound("Produto não encontrado...");
@@ -162,22 +178,5 @@ public class ProdutosController : ControllerBase
         var produtoDeletadoDto = _mapper.Map<ProdutoDTO>(produtoDeletado);
 
         return Ok(produtoDeletadoDto);
-    }
-
-    private ActionResult<IEnumerable<ProdutoDTO>> ObterProdutos(X.PagedList.IPagedList<Produto> produtos)
-    {
-        var metadata = new
-        {
-            produtos.Count,
-            produtos.PageSize,
-            produtos.PageCount,
-            produtos.TotalItemCount,
-            produtos.HasNextPage,
-            produtos.HasPreviousPage
-        };
-
-        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
-        return Ok(produtosDto);
     }
 }
