@@ -13,6 +13,8 @@ public class ProdutoDTO
     [Required]
     [StringLength(300)]
     public string? Descricao { get; set; }
+    
+    public string? ImagemUrl { get; set; }
 
     [Required]
     public decimal Preco { get; set; }

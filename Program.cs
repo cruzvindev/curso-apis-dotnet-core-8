@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using APICatalogo.Context;
 using APICatalogo.DTOs.Mappings;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using APICatalogo.Models;
+using APICatalogo.OpenApiConfiguration;
 using APICatalogo.RateLimitOptions;
 using APICatalogo.Services;
 using Asp.Versioning;
@@ -76,11 +78,12 @@ builder.Services.AddRateLimiter(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo{Title = "apicatalogo", Version = "v1"});
+    options.SwaggerDoc("v1", new OpenApiInfo{Title = "apicatalogo", Version = "v1"});
+    options.DocumentFilter<RemoveUnusedSchemasDocumentFilter>();
     
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
         Type = SecuritySchemeType.ApiKey,
@@ -89,7 +92,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Bearer JWT ",
     });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme()
@@ -103,6 +106,10 @@ builder.Services.AddSwaggerGen(c =>
             new string[]{}
         }
     });
+
+    //Configura o uso dos comentários XML para fins de documentação Swagger
+    var xmlFileName = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFileName));
 });
 
 //Evita a referência cíclica

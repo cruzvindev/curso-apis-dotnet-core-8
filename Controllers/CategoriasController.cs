@@ -14,6 +14,8 @@ namespace APICatalogo.Controllers;
 [Route("[controller]/v{version:apiVersion}")]
 [ApiController]
 [EnableRateLimiting("fixedwindow")]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class CategoriasController : ControllerBase
 {
     private readonly IUnityOfWork _uof;
@@ -26,6 +28,10 @@ public class CategoriasController : ControllerBase
         _uof = uof;
     }
 
+    /// <summary>
+    /// Obtém uma lista de objetos Categoria
+    /// </summary>
+    /// <returns>Uma lista de objetos Categoria</returns>
     [HttpGet]
     //[Authorize]
     [DisableRateLimiting]
@@ -55,7 +61,15 @@ public class CategoriasController : ControllerBase
         return ObterCategorias(categoriasFiltradas);
     }
 
+    
+    /// <summary>
+    /// Obtém uma Categoria por Id
+    /// </summary>
+    /// <param name="id">ID da Categoria a ser buscada</param>
+    /// <returns>A Categoria com o ID correpondente</returns>
     [HttpGet("{id:int}", Name = "ObterCategoria")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoriaDTO>> Get(int id)
     {
         var categoria = await _uof.CategoriaRepository.GetAsync(c => c.CategoriaId == id);
@@ -63,7 +77,8 @@ public class CategoriasController : ControllerBase
         if (categoria is null)
         {
             _logger.LogWarning($"Categoria com id= {id} não encontrada...");
-            return NotFound($"Categoria com id= {id} não encontrada...");
+            return NotFound(new Categoria { CategoriaId = 1, Nome = null, Produtos = null, ImagemUrl = null });
+            //return NotFound($"Categoria com id= {id} não encontrada...");
         }
 
         var categoriaDto = categoria.ToCategoriaDTO();
